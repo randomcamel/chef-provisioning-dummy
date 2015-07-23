@@ -18,8 +18,9 @@
 #     ├── dummy_support.rb
 #     └── spec_helper.rb
 
-snake_name = ARGV[1].downcase
-snake_driver = "#{snake_name.gsub('-', '_')}_driver"
+driver_name = ARGV[1]
+snake_name = driver_name.downcase.gsub('-', '_')
+snake_driver = "#{snake_name}_driver"
 driver_dir = "#{ENV['PWD']}/chef-provisioning-#{snake_name}"
 
 camel_name = snake_name.split(/[_-]/).collect(&:capitalize).join
@@ -128,4 +129,8 @@ module #{camel_name}Config
   end
 end
 EOS
+end
+
+log "If you'd like to package this as a gem, start with the following command: 'cd .. && bundle gem chef-provisioning-#{driver_name}'" do
+  not_if { File.exist?("chef-provisioning-#{driver_name}.gemspec") }
 end
