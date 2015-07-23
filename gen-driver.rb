@@ -19,8 +19,8 @@
 #     └── spec_helper.rb
 
 snake_name = ARGV[1].downcase
-snake_driver = "#{snake_name}_driver"
-driver_dir = "#{ENV['PWD']}/chef-provisioning-#{snake_name.gsub('-', '-')}"
+snake_driver = "#{snake_name.gsub('-', '_')}_driver"
+driver_dir = "#{ENV['PWD']}/chef-provisioning-#{snake_name}"
 
 camel_name = snake_name.split('_').collect(&:capitalize).join
 
@@ -32,17 +32,28 @@ def prefix(subpath)
   "lib/chef/provisioning/#{subpath}"
 end
 
-["driver_init", "#{snake_name}_driver"].each do |dir|
-  directory prefix(dir) do
-    recursive true
-  end
+# driver_init/
+directory prefix("driver_init") do
+  recursive true
+end
+
+file prefix("driver_init/#{snake_name}.rb") do
+  content <<-EOS
+require 'chef/provisioning/#{snake_driver}/driver'
+ChefMetal.register_driver_class('#{snake_name}', Chef::Provisioning::#{camel_name}Driver::Driver)
+  EOS
 end
 
 file prefix("#{snake_driver}.rb") do
   content <<-EOS
-  require 'chef/provisioning'
-  require 'chef/provisioning/#{snake_driver}/driver'
+require 'chef/provisioning'
+require 'chef/provisioning/#{snake_driver}/driver'
   EOS
+end
+
+# #{driver_name}_driver/
+directory prefix("#{snake_driver}") do
+  recursive true
 end
 
 file prefix("#{snake_driver}/version.rb") do
@@ -55,7 +66,7 @@ end
 end
 end
 EOS
-  end
+end
 
 file prefix("#{snake_driver}/driver.rb")
 
