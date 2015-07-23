@@ -18,11 +18,11 @@
 #     ├── dummy_support.rb
 #     └── spec_helper.rb
 
-underscore_name = ARGV[1].downcase
-underscore_driver = "#{underscore_name}_driver"
-driver_dir = "#{ENV['PWD']}/chef-provisioning-#{underscore_name.gsub('-', '-')}"
+snake_name = ARGV[1].downcase
+snake_driver = "#{snake_name}_driver"
+driver_dir = "#{ENV['PWD']}/chef-provisioning-#{snake_name.gsub('-', '-')}"
 
-camel_name = underscore_name.split('_').collect(&:capitalize).join
+camel_name = snake_name.split('_').collect(&:capitalize).join
 
 # gross.
 `mkdir #{driver_dir}`
@@ -32,20 +32,20 @@ def prefix(subpath)
   "lib/chef/provisioning/#{subpath}"
 end
 
-["driver_init", "#{underscore_name}_driver"].each do |dir|
+["driver_init", "#{snake_name}_driver"].each do |dir|
   directory prefix(dir) do
     recursive true
   end
 end
 
-file prefix("#{underscore_driver}.rb") do
+file prefix("#{snake_driver}.rb") do
   content <<-EOS
   require 'chef/provisioning'
-  require 'chef/provisioning/#{underscore_driver}/driver'
+  require 'chef/provisioning/#{snake_driver}/driver'
   EOS
 end
 
-file prefix("#{underscore_driver}/version.rb") do
+file prefix("#{snake_driver}/version.rb") do
   content <<-EOS
 class Chef
 module Provisioning
@@ -57,16 +57,35 @@ end
 EOS
   end
 
-file prefix("#{underscore_driver}/driver.rb")
+file prefix("#{snake_driver}/driver.rb")
 
 execute "rspec --init && echo '-fd' >> .rspec" do
   cwd driver_dir
   not_if { File.exist?("spec") }
 end
 
-file "spec/#{underscore_name}_spec.rb"
+file "spec/#{snake_name}_spec.rb" do
+  content <<-EOS
+describe "Chef::Provisioning::#{camel_name}" do
+  extend #{camel_name}Support
+  include #{camel_name}Config
 
-file "spec/#{underscore_name}_support.rb" do
+  when_the_chef_12_server "exists", server_scope: :context, port: 8900..9000 do
+    with_dummy "integration tests" do
+      context "machine resource" do
+        it "runs :create by default" do
+          expect_recipe {
+            machine "fake-machine"
+          }
+        end
+      end
+    end
+  end
+end
+  EOS
+end
+
+file "spec/#{snake_name}_support.rb" do
   content <<-EOS
 module #{camel_name}Support
   require 'cheffish/rspec/chef_run_support'
@@ -76,9 +95,9 @@ module #{camel_name}Support
 
   def with_dummy(description, *tags, &block)
     context_block = proc do
-      #{underscore_name}_driver = Chef::Provisioning.driver_for_url("#{underscore_name}")
+      #{snake_name}_driver = Chef::Provisioning.driver_for_url("#{snake_name}")
 
-      @@driver = #{underscore_name}_driver
+      @@driver = #{snake_name}_driver
       def self.driver
         @@driver
       end
@@ -93,7 +112,7 @@ end
 module #{camel_name}Config
   def chef_config
     @chef_config ||= {
-      driver:       Chef::Provisioning.driver_for_url("#{underscore_name}"),
+      driver:       Chef::Provisioning.driver_for_url("#{snake_name}"),
     }
   end
 end
