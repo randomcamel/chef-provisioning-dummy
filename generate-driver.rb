@@ -65,7 +65,6 @@ file prefix("#{snake_driver}/driver.rb") do
   content <<-EOS
 require 'chef/provisioning/driver'
 require 'chef/provisioning/#{snake_driver}/version'
-#require 'chef/provisioning/convergence_strategy/no_converge'
 
 class Chef
 module Provisioning
@@ -121,12 +120,12 @@ describe "Chef::Provisioning::#{camel_name}" do
   include #{camel_name}Config
 
   when_the_chef_12_server "exists", server_scope: :context, port: 8900..9000 do
-    with_#{snake_name} "integration tests" do
+    # with_#{snake_name} "integration tests" do
       context "machine resource" do
         it "doesn't run any tests" do
         end
       end
-    end
+    # end
   end
 end
   EOS
@@ -142,7 +141,8 @@ module #{camel_name}Support
     other.extend Cheffish::RSpec::ChefRunSupport
   end
 
-  #require 'chef/provisioning/fake_generated_driver'
+  # needed?
+  require 'chef/provisioning/fake_generated_driver'
   def with_#{snake_name}(description, *tags, &block)
     context_block = proc do
       #{snake_driver} = Chef::Provisioning.driver_for_url("#{snake_name}")
