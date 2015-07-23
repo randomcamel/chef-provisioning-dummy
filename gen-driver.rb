@@ -22,7 +22,7 @@ snake_name = ARGV[1].downcase
 snake_driver = "#{snake_name.gsub('-', '_')}_driver"
 driver_dir = "#{ENV['PWD']}/chef-provisioning-#{snake_name}"
 
-camel_name = snake_name.split('_').collect(&:capitalize).join
+camel_name = snake_name.split(/[_-]/).collect(&:capitalize).join
 
 # gross.
 `mkdir #{driver_dir}`
