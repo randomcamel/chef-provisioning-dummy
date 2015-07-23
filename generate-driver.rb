@@ -1,23 +1,5 @@
 #!/usr/bin/env chef-apply
 
-
-# ├── Gemfile
-# ├── Gemfile.lock
-# ├── chef-provisioning-dummy.gemspec
-# ├── lib
-# │   └── chef
-# │       └── provisioning
-# │           ├── driver_init
-# │           │   └── dummy.rb
-# │           ├── dummy_driver
-# │           │   ├── driver.rb
-# │           │   └── version.rb
-# │           └── dummy_driver.rb
-# └── spec
-#     ├── dummy_spec.rb
-#     ├── dummy_support.rb
-#     └── spec_helper.rb
-
 driver_name = ARGV[1]
 snake_name = driver_name.downcase.gsub('-', '_')
 snake_driver = "#{snake_name}_driver"
