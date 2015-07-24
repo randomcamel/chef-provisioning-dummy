@@ -26,7 +26,7 @@ end
 file prefix("driver_init/#{snake_name}.rb") do
   content <<-EOS
 require 'chef/provisioning/#{snake_driver}/driver'
-ChefMetal.register_driver_class('#{snake_name}', Chef::Provisioning::#{camel_name}Driver::Driver)
+Chef::Provisioning.register_driver_class('#{snake_name}', Chef::Provisioning::#{camel_name}Driver::Driver)
   EOS
 end
 
